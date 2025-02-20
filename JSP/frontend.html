@@ -39,8 +39,15 @@
         const ctx = canvas.getContext("2d");
         let autoUpdate = null;
 
-        async function addRandomParticles(count = 100) {
-    const centralMass = { x: 0, y: 0, vx: 0, vy: 0, mass: 5e12 };
+        async function addRandomParticles(count = 50) {
+    const canvasWidth = 800;
+    const canvasHeight = 600;
+    const centerX = 0;
+    const centerY = 0;
+    const G = 6.67430e-11;
+    const sunMass = 5e15;
+
+    const centralMass = { x: centerX, y: centerY, vx: 0, vy: 0, mass: sunMass };
     await fetch(`${API_BASE}/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,16 +56,17 @@
 
     for (let i = 0; i < count; i++) {
         let angle = Math.random() * 2 * Math.PI;
-        let distance = Math.random() * 200 + 50; // Random orbital distance
-        let speed = Math.sqrt(1e-6 * centralMass.mass / distance); // Orbital velocity
+        let minDistance = 120;
+        let maxDistance = Math.min(canvasWidth, canvasHeight) / 2 - 50;
+        let distance = Math.random() * (maxDistance - minDistance) + minDistance;
+        let speed = Math.sqrt((G * sunMass) / distance);
 
-        const particle = {
-            x: distance * Math.cos(angle),
-            y: distance * Math.sin(angle),
-            vx: -speed * Math.sin(angle),
-            vy: speed * Math.cos(angle),
-            mass: Math.random() * 1e10 + 1e9
-        };
+        let x = distance * Math.cos(angle);
+        let y = distance * Math.sin(angle);
+        let vx = -speed * Math.sin(angle);
+        let vy = speed * Math.cos(angle);
+
+        const particle = { x, y, vx, vy, mass: Math.random() * 1e9 + 1e8 };
 
         await fetch(`${API_BASE}/add`, {
             method: "POST",
@@ -66,8 +74,11 @@
             body: JSON.stringify(particle)
         });
     }
-    console.log(`${count} orbiting particles added!`);
+
+    console.log(`${count} orbiting particles added.`);
 }
+
+
 
 
         async function updateSimulation() {
