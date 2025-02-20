@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Body Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: black;
+            color: white;
+        }
+        canvas {
+            border: 1px solid white;
+            background-color: black;
+        }
+        .controls {
+            margin: 10px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>N-Body Simulation</h1>
+
+    <button onclick="startSimulation()">Start Simulation</button>
+    <button onclick="stopSimulation()">Stop Simulation</button>
+    <canvas id="simulationCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const API_BASE = "http://localhost:8080/simulation";
+        const canvas = document.getElementById("simulationCanvas");
+        const ctx = canvas.getContext("2d");
+        let autoUpdate = null;
+
+        async function addRandomParticles(count = 100) {
+    const centralMass = { x: 0, y: 0, vx: 0, vy: 0, mass: 5e12 };
+    await fetch(`${API_BASE}/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(centralMass)
+    });
+
+    for (let i = 0; i < count; i++) {
+        let angle = Math.random() * 2 * Math.PI;
+        let distance = Math.random() * 200 + 50; // Random orbital distance
+        let speed = Math.sqrt(1e-6 * centralMass.mass / distance); // Orbital velocity
+
+        const particle = {
+            x: distance * Math.cos(angle),
+            y: distance * Math.sin(angle),
+            vx: -speed * Math.sin(angle),
+            vy: speed * Math.cos(angle),
+            mass: Math.random() * 1e10 + 1e9
+        };
+
+        await fetch(`${API_BASE}/add`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(particle)
+        });
+    }
+    console.log(`${count} orbiting particles added!`);
+}
+
+
+        async function updateSimulation() {
+            await fetch(`${API_BASE}/update`, { method: "POST" });
+            drawParticles();
+        }
+
+        async function getParticles() {
+            const response = await fetch(`${API_BASE}/particles`);
+            return await response.json();
+        }
+
+        async function drawParticles() {
+            const particles = await getParticles();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x + canvas.width / 2, p.y + canvas.height / 2, 3, 0, Math.PI * 2);
+                ctx.fillStyle = "white";
+                ctx.fill();
+            });
+        }
+
+        function startSimulation() {
+            if (!autoUpdate) {
+                autoUpdate = setInterval(updateSimulation, 50);
+            }
+        }
+
+        function stopSimulation() {
+            clearInterval(autoUpdate);
+            autoUpdate = null;
+        }
+
+        // Initialize with 100 particles
+        addRandomParticles(100).then(() => {
+            startSimulation();
+        });
+    </script>
+</body>
+</html>
