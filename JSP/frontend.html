@@ -24,6 +24,10 @@
             font-size: 16px;
             cursor: pointer;
         }
+        .info-bar {
+            margin-top: 10px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -31,59 +35,68 @@
 
     <button onclick="startSimulation()">Start Simulation</button>
     <button onclick="stopSimulation()">Stop Simulation</button>
+    <button onclick="addRandomParticles(10)">Add Random Particles</button>
+
+    <p class="info-bar">Sun Mass: <span id="sunMassDisplay">5e15</span></p>
     <canvas id="simulationCanvas" width="800" height="600"></canvas>
 
     <script>
         const API_BASE = "http://localhost:8080/simulation";
         const canvas = document.getElementById("simulationCanvas");
         const ctx = canvas.getContext("2d");
+        const sunMassDisplay = document.getElementById("sunMassDisplay");
+
         let autoUpdate = null;
+        let sunPosition = { x: 0, y: 0 };
+        let sunMass = 5e15; 
 
-        async function addRandomParticles(count = 50) {
-    const canvasWidth = 800;
-    const canvasHeight = 600;
-    const centerX = 0;
-    const centerY = 0;
-    const G = 6.67430e-11;
-    const sunMass = 5e15;
+        async function addRandomParticles(count = 100) {
+            const G = 6.67430e-11;
 
-    const centralMass = { x: centerX, y: centerY, vx: 0, vy: 0, mass: sunMass };
-    await fetch(`${API_BASE}/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(centralMass)
-    });
+            const centralMass = { x: sunPosition.x, y: sunPosition.y, vx: 0, vy: 0, mass: sunMass };
+            await fetch(`${API_BASE}/add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(centralMass)
+            });
 
-    for (let i = 0; i < count; i++) {
-        let angle = Math.random() * 2 * Math.PI;
-        let minDistance = 120;
-        let maxDistance = Math.min(canvasWidth, canvasHeight) / 2 - 50;
-        let distance = Math.random() * (maxDistance - minDistance) + minDistance;
-        let speed = Math.sqrt((G * sunMass) / distance);
+            for (let i = 0; i < count; i++) {
+                let angle = Math.random() * 2 * Math.PI;
+                let minDistance = 120;
+                let maxDistance = Math.min(canvas.width, canvas.height) / 2 - 50;
+                let distance = Math.random() * (maxDistance - minDistance) + minDistance;
+                let speed = Math.sqrt((G * sunMass) / distance);
 
-        let x = distance * Math.cos(angle);
-        let y = distance * Math.sin(angle);
-        let vx = -speed * Math.sin(angle);
-        let vy = speed * Math.cos(angle);
+                let x = distance * Math.cos(angle) + sunPosition.x;
+                let y = distance * Math.sin(angle) + sunPosition.y;
+                let vx = -speed * Math.sin(angle);
+                let vy = speed * Math.cos(angle);
 
-        const particle = { x, y, vx, vy, mass: Math.random() * 1e9 + 1e8 };
+                const particle = { x, y, vx, vy, mass: Math.random() * 1e9 + 1e8 };
 
-        await fetch(`${API_BASE}/add`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(particle)
-        });
-    }
+                await fetch(`${API_BASE}/add`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(particle)
+                });
+            }
 
-    console.log(`${count} orbiting particles added.`);
-}
-
-
-
+            console.log(`${count} orbiting particles added.`);
+        }
 
         async function updateSimulation() {
             await fetch(`${API_BASE}/update`, { method: "POST" });
             drawParticles();
+        }
+
+        async function updateSun() {
+            await fetch(`${API_BASE}/update-sun`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ x: sunPosition.x, y: sunPosition.y, mass: sunMass })
+            });
+
+            sunMassDisplay.textContent = sunMass.toExponential(2);
         }
 
         async function getParticles() {
@@ -95,6 +108,13 @@
             const particles = await getParticles();
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.arc(sunPosition.x + canvas.width / 2, sunPosition.y + canvas.height / 2, 10, 0, Math.PI * 2);
+            ctx.fillStyle = "yellow";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "yellow";
+            ctx.fill();
 
             particles.forEach(p => {
                 ctx.beginPath();
@@ -115,7 +135,66 @@
             autoUpdate = null;
         }
 
-        // Initialize with 100 particles
+        let sunMovable = false;
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key.toLowerCase() === "s") {
+                sunMovable = !sunMovable; 
+                console.log(`Sun movement: ${sunMovable ? "Enabled" : "Disabled"}`);
+            }
+        });
+
+        canvas.addEventListener("mousemove", (event) => {
+            if (!sunMovable) return; 
+
+            const rect = canvas.getBoundingClientRect();
+            sunPosition.x = event.clientX - rect.left - canvas.width / 2;
+            sunPosition.y = event.clientY - rect.top - canvas.height / 2;
+            updateSun();
+        });
+
+        async function addRandomParticles(count = 10) {
+    const G = 6.67430e-11;
+
+    for (let i = 0; i < count; i++) {
+        let angle = Math.random() * 2 * Math.PI;
+        let minDistance = 120;
+        let maxDistance = Math.min(canvas.width, canvas.height) / 2 - 50;
+        let distance = Math.random() * (maxDistance - minDistance) + minDistance;
+        let speed = Math.sqrt((G * sunMass) / distance);
+
+        let x = distance * Math.cos(angle) + sunPosition.x;
+        let y = distance * Math.sin(angle) + sunPosition.y;
+        let vx = -speed * Math.sin(angle);
+        let vy = speed * Math.cos(angle);
+
+        const particle = { x, y, vx, vy, mass: Math.random() * 1e9 + 1e8 };
+
+        await fetch(`${API_BASE}/add`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(particle)
+        });
+    }
+
+    console.log(`${count} new particles added.`);
+}
+
+
+
+        canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        
+        sunMass *= event.deltaY < 0 ? 2 : 0.2;
+
+        if (sunMass < 1e5) { 
+            sunMass = 1e5;
+        }
+
+        updateSun();
+    });
+
+
         addRandomParticles(100).then(() => {
             startSimulation();
         });

@@ -32,4 +32,10 @@ public class SimulationResource {
         simulationService.updateSimulation();
         return "Simulation updated!";
     }
+
+    @POST
+    @Path("/update-sun")
+    public void updateSunPosition(Particle newSunPosition) {
+        simulationService.updateSunPosition(newSunPosition);
+    }
 }
