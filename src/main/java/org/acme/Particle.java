@@ -24,18 +24,26 @@ public class Particle {
     }
 
     public void addForce(double fx, double fy) {
+        if (Double.isNaN(fx) || Double.isNaN(fy) || Double.isInfinite(fx) || Double.isInfinite(fy)) {
+            return;
+        }
         ax += fx / mass;
         ay += fy / mass;
     }
+
 
     public void update(double dt) {
         if (Double.isNaN(ax) || Double.isNaN(ay)) {
             ax = 0;
             ay = 0;
+            vx = 0;
+            vy = 0;
         }
         if (Double.isInfinite(ax) || Double.isInfinite(ay)) {
             ax = 0;
             ay = 0;
+            vx = 0;
+            vy = 0;
         }
 
         vx += ax * dt;
@@ -43,7 +51,6 @@ public class Particle {
         x += vx * dt;
         y += vy * dt;
 
-        // 🚀 Prevent Invalid Positions
         if (Double.isNaN(x) || Double.isNaN(y) || Double.isInfinite(x) || Double.isInfinite(y)) {
             x = 0;
             y = 0;
@@ -53,7 +60,6 @@ public class Particle {
     }
 
 
-    // Getters and Setters (Needed for JSON mapping)
     public double getX() { return x; }
     public double getY() { return y; }
     public double getVx() { return vx; }

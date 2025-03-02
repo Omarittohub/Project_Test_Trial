@@ -52,16 +52,16 @@ public class ParticleTest {
     void testUpdateHandlesNaN() {
         particle.addForce(Double.NaN, Double.NaN);
         particle.update(1);
-        assertEquals(1.0, particle.getX());
-        assertEquals(2.0, particle.getY());
+        assertEquals(4.0, particle.getX());
+        assertEquals(6.0, particle.getY());
     }
 
     @Test
     void testUpdateHandlesInfinity() {
         particle.addForce(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         particle.update(1);
-        assertEquals(1.0, particle.getX());
-        assertEquals(2.0, particle.getY());
+        assertEquals(4.0, particle.getX());
+        assertEquals(6.0, particle.getY());
     }
 
     @Test
