@@ -55,7 +55,7 @@ public class SimulationService {
             double dy = p.getY() - sun.getY();
             double distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 20 && sun.getMass() > 1e15) { // If Sun is massive, "stick" particles
+            if (distance < 20 && sun.getMass() > 1e15) {
                 p.setX(sun.getX());
                 p.setY(sun.getY());
                 p.setVx(0);

@@ -27,7 +27,7 @@ public class ParticleTest {
     void testResetForce() {
         particle.addForce(10, 20);
         particle.resetForce();
-        particle.update(1);  // Ensure no residual force affects motion
+        particle.update(1);
         assertEquals(3.0, particle.getVx());
         assertEquals(4.0, particle.getVy());
     }
