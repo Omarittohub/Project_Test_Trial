@@ -15,7 +15,6 @@ dependencies {
     implementation 'io.quarkus:quarkus-arc'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
-    testImplementation 'org.eclipse:yasson:1.0.8'
 }
 
 group 'org.acme'
