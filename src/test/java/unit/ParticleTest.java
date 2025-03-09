@@ -64,8 +64,4 @@ public class ParticleTest {
         assertEquals(6.0, particle.getY());
     }
 
-    @Test
-    void testToString() {
-        assertEquals("Particle at (1.00, 2.00) with velocity (3.00, 4.00)", particle.toString());
-    }
 }

@@ -5,24 +5,51 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service de simulation pour un système N-corps.
+ * Ce service gère l'ajout de particules, leur mise à jour et l'application de la gravité.
+ */
 @ApplicationScoped
 public class SimulationService {
-    private static final double G = 6.67430e-11; 
+
+    /** Constante de gravitation universelle. */
+    private static final double G = 6.67430e-11;
+
+    /** Pas de temps pour la mise à jour de la simulation. */
     private static final double TIME_STEP = 0.05;
+
+    /** Liste des particules de la simulation. */
     private List<Particle> particles = new ArrayList<>();
 
+    /**
+     * Constructeur qui initialise la masse centrale.
+     */
     public SimulationService() {
         initializeCentralMass();
     }
 
+    /**
+     * Ajoute une nouvelle particule à la simulation.
+     *
+     * @param p La particule à ajouter
+     */
     public void addParticle(Particle p) {
         particles.add(p);
     }
 
+    /**
+     * Retourne la liste des particules de la simulation.
+     *
+     * @return Liste des particules
+     */
     public List<Particle> getParticles() {
         return particles;
     }
 
+    /**
+     * Initialise la masse centrale (le "soleil" de la simulation).
+     * Si aucune particule n'est présente, une particule centrale est ajoutée.
+     */
     private void initializeCentralMass() {
         if (particles.isEmpty()) {
             particles.add(new Particle(0, 0, 0, 0, 5e15));
@@ -36,7 +63,9 @@ public class SimulationService {
         }
     }
 
-
+    /**
+     * Met à jour la simulation en recalculant les forces et les positions des particules.
+     */
     public void updateSimulation() {
         for (Particle p : particles) {
             p.resetForce();
@@ -66,6 +95,12 @@ public class SimulationService {
         }
     }
 
+    /**
+     * Applique la force gravitationnelle entre deux particules.
+     *
+     * @param p1 Première particule
+     * @param p2 Deuxième particule
+     */
     private void applyGravity(Particle p1, Particle p2) {
         double dx = p2.getX() - p1.getX();
         double dy = p2.getY() - p1.getY();
@@ -80,16 +115,16 @@ public class SimulationService {
         p2.addForce(-fx, -fy);
     }
 
-
+    /**
+     * Met à jour la position de la masse centrale (le soleil).
+     *
+     * @param newSun Nouvelle position et masse du soleil
+     */
     public void updateSunPosition(Particle newSun) {
         Particle sun = particles.get(0);
         sun.setX(newSun.getX());
         sun.setY(newSun.getY());
         sun.setMass(newSun.getMass());
     }
-
-
-
-
-
 }
+

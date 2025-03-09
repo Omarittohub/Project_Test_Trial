@@ -1,67 +1,89 @@
-# code-with-quarkus
+```markdown
+# Simulation N-Corps avec Quarkus
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Ce projet implémente une **simulation d'anticorps** basée sur une simulation N-corps, en utilisant **Quarkus**, un framework Java rapide et léger. L'application est développée en **Java** pour le backend et communique avec un frontend.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## 🛠 Technologies Utilisées
+- **Quarkus** – Framework backend ultrarapide
+- **Gradle** – Outil de gestion de construction
+- **JUnit** – Tests unitaires et d'intégration
+- **RESTEasy** – API REST en Jakarta REST
 
-## Running the application in dev mode
+## 🚀 Lancer l'application en mode développement
 
-You can run your application in dev mode that enables live coding using:
+Lancez l'application en mode développement avec :
 
-```shell script
+```shell
 ./gradlew quarkusDev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+## 📦 Packaging et Exécution
 
-## Packaging and running the application
+L'application peut être packagée avec :
 
-The application can be packaged using:
-
-```shell script
+```shell
 ./gradlew build
 ```
 
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
+## 📡 API REST
+L'application expose une API REST pour interagir avec la simulation. Voici les principaux endpoints :
 
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
+### Ajouter une particule
+- **POST** `/simulation/add`
+- **Corps de la requête** :
+  ```json
+  {
+    "x": 1.0,
+    "y": 2.0,
+    "vx": 0.5,
+    "vy": -0.3,
+    "mass": 10.0
+  }
+  ```
 
-If you want to build an _über-jar_, execute the following command:
+### Récupérer les particules
+- **GET** `/simulation/particles`
 
-```shell script
-./gradlew build -Dquarkus.package.jar.type=uber-jar
+### Mettre à jour la simulation
+- **POST** `/simulation/update`
+
+### Mettre à jour la position du soleil (masse centrale)
+- **POST** `/simulation/update-sun`
+    - Corps de la requête :
+  ```json
+  {
+    "x": 0.0,
+    "y": 0.0,
+    "mass": 5e15
+  }
+  ```
+
+## Tests et Qualité
+- Les **tests unitaires** sont définis dans `src/test/java/unit/`.
+- Les **tests API** sont définis dans `src/test/java/api/`.
+- Les **tests d'intégration** sont définis dans `src/test/java/integration/`.
+- Exécutez tous les tests avec :
+  ```shell
+  ./gradlew test
+  ```
+
+## 📂 Structure du Projet
+```
+Project_Test_Trial/
+├── src/
+│   ├── main/java/org/acme/
+│   │   ├── Particle.java   # Modélisation d'une particule
+│   │   ├── SimulationService.java  # Gestion de la simulation
+│   │   ├── SimulationResource.java  # API REST
+│   ├── test/java/ # Dossiers de test
+│   ├── native-test/java/ # Tests natifs
+├── build.gradle  # Configuration Gradle
+├── README.md  # Ce fichier
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true
+## 📚 Guides 
+- **Quarkus et RESTEasy Classic JSON-B** : [Guide](https://quarkus.io/guides/rest-json)
+- **Introduction à RESTEasy** : [Guide](https://quarkus.io/guides/resteasy)
+- **Documentation officielle Quarkus** : [Site Web](https://quarkus.io/guides/)
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./build/code-with-quarkus-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/gradle-tooling>.
-
-## Related Guides
-
-- RESTEasy Classic JSON-B ([guide](https://quarkus.io/guides/rest-json)): JSON-B serialization support for RESTEasy Classic
-- RESTEasy Classic ([guide](https://quarkus.io/guides/resteasy)): REST endpoint framework implementing Jakarta REST and more
-
-## Provided Code
-
-### RESTEasy JAX-RS
-
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)

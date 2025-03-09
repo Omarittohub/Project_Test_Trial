@@ -21,8 +21,8 @@ public class SimulationIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        simulationService.getParticles().clear(); // Clear existing particles before each test
-        simulationService.addParticle(new Particle(0, 0, 0, 0, 5e15)); // Initialize with central mass
+        simulationService.getParticles().clear();
+        simulationService.addParticle(new Particle(0, 0, 0, 0, 5e15));
     }
 
     @Test
@@ -42,7 +42,6 @@ public class SimulationIntegrationTest {
         Particle particle = new Particle(1.0, 2.0, 3.0, 4.0, 5.0);
         simulationResource.addParticle(particle);
         simulationResource.updateSimulation();
-        // Add assertions to verify the state of particles after update
         assertNotNull(simulationService.getParticles().get(1));
     }
 
